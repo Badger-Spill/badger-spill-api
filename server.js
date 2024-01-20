@@ -1,6 +1,7 @@
 const process = require("process");
 const fs = require("fs");
 const express = require("express");
+const cors = require("cors");
 const https = require("https");
 const nodemailer = require("nodemailer");
 
@@ -80,6 +81,14 @@ async function emailSpill(req) {
 }
 
 const app = express();
+
+// Set up CORS headers
+const whitelist = ['https://thebadgerspill.com', 'https://badger-spill.github.io']
+const corsOptions = {
+  origin: whitelist
+}
+app.use(cors(corsOptions))
+
 app.post("/spill", (req, res) => {
   // Verify captcha
   if (!validateCaptcha(req)) {
