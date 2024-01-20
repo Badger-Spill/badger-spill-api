@@ -11,7 +11,6 @@ const TIMEZONE = "America/Chicago";
 // Environment Variables
 const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
 const TLS_CERT = fs.readFileSync(process.env.TLS_CERT);
-const TLS_CA = fs.readFileSync(process.env.TLS_CA);
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
 const GMAIL_USERNAME = process.env.GMAIL_USERNAME;
 const GMAIL_APP_PASS = process.env.GMAIL_PASS; // This is NOT the Google account password. It is a 16-digit generated passcode.
@@ -19,7 +18,6 @@ const GMAIL_APP_PASS = process.env.GMAIL_PASS; // This is NOT the Google account
 const credentials = {
   key: TLS_KEY,
   cert: TLS_CERT,
-  ca: TLS_CA,
 };
 
 const transporter = nodemailer.createTransport({
@@ -56,7 +54,7 @@ async function emailSpill(req) {
 
   const mailOptions = {
     from: GMAIL_USERNAME,
-    to: "recipient_email@example.com", // TODO
+    to: "dev.badgerspill@gmail.com", // TODO
     subject: `Spill Received [${dateString}]`,
     text: `Date/time received: ${dateString}
         IP Address: ${req.ip}
