@@ -94,6 +94,11 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 app.post("/spill", (req, res) => {
+  if (!req.body) {
+    res.status(400).send("No body attached to request.");
+    return;
+  }
+
   // Verify captcha
   if (!validateCaptcha(req)) {
     res
@@ -126,10 +131,12 @@ app.post("/spill", (req, res) => {
   // Verify that a message is present
   if (!req.body["message"]) {
     res.status(400).send("No message was included.");
+    return;
   }
 
   // Send email
   emailSpill(req);
+  res.status(200).send();
 });
 
 const server = https.createServer(credentials, app);
