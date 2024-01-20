@@ -8,13 +8,14 @@ const nodemailer = require("nodemailer");
 // Config
 const TIME_LOCALE = "en-US";
 const TIMEZONE = "America/Chicago";
+const CORS_WHITELIST = ['https://thebadgerspill.com', 'https://badger-spill.github.io']; // This is the list of domains that forms can be submitted from
 
 // Environment Variables
 const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
 const TLS_CERT = fs.readFileSync(process.env.TLS_CERT);
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
 const GMAIL_USERNAME = process.env.GMAIL_USERNAME;
-const GMAIL_APP_PASS = process.env.GMAIL_PASS; // This is NOT the Google account password. It is a 16-digit generated passcode.
+const GMAIL_APP_PASS = process.env.GMAIL_PASS;
 
 const credentials = {
   key: TLS_KEY,
@@ -49,6 +50,10 @@ async function validateCaptcha(req) {
   }
 }
 
+/**
+ * This function processes a request object and sends a new spill email.
+ * @param {*} req 
+ */
 async function emailSpill(req) {
   const date = new Date();
   const dateString = date.toLocaleString(TIME_LOCALE, { timeZone: TIMEZONE });
@@ -83,9 +88,8 @@ async function emailSpill(req) {
 const app = express();
 
 // Set up CORS headers
-const whitelist = ['https://thebadgerspill.com', 'https://badger-spill.github.io']
 const corsOptions = {
-  origin: whitelist
+  origin: CORS_WHITELIST
 }
 app.use(cors(corsOptions))
 
