@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  app:
+    image: badger-spill-api:latest
+    container_name: badger-spill-api
+    ports:
+      - "443:443"
+    restart: always
+    environment:
+      - TLS_KEY=${TLS_KEY}
+      - TLS_CERT=${TLS_CERT}
+      - TLS_CA=${TLS_CA}
+      - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+      - GMAIL_USERNAME=${GMAIL_USERNAME}
+      - GMAIL_APP_PASS=${GMAIL_APP_PASS}

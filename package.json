@@ -1,0 +1,20 @@
+{
+  "name": "badger-spill-api",
+  "version": "1.0.0",
+  "description": "API Server for handling Badger Spill submissions",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Badger-Spill/badger-spill-api.git"
+  },
+  "author": "James Julich",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Badger-Spill/badger-spill-api/issues"
+  },
+  "homepage": "https://github.com/Badger-Spill/badger-spill-api#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.8"
+  }
+}
