@@ -11,3 +11,6 @@ services:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - GMAIL_USERNAME=${GMAIL_USERNAME}
       - GMAIL_APP_PASS=${GMAIL_APP_PASS}
+    volumes:
+      - ${TLS_KEY}:${TLS_KEY}
+      - ${TLS_CERT}:${TLS_CERT}
