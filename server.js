@@ -8,7 +8,7 @@ const nodemailer = require("nodemailer");
 // Config
 const TIME_LOCALE = "en-US";
 const TIMEZONE = "America/Chicago";
-const CORS_WHITELIST = ['https://thebadgerspill.com', 'https://badger-spill.github.io']; // This is the list of domains that forms can be submitted from
+const CORS_WHITELIST = ['https://thebadgerspill.com', 'https://badger-spill.github.io', 'http://localhost:4321']; // This is the list of domains that forms can be submitted from
 
 // Environment Variables
 const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
