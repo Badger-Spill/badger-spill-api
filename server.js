@@ -82,6 +82,8 @@ ${req.body["message"]}
 
 ---- End Message ----
 
+
+
 **Keep confidential**
 Sender email: ${req.body["email"]}
 `,
@@ -150,7 +152,7 @@ app.post("/spill", async (req, res) => {
 
   // Send email
   await emailSpill(req);
-  res.status(200).send();
+  res.status(200).send("Your spill has been sent successfully!");
 });
 
 const server = https.createServer(credentials, app);
