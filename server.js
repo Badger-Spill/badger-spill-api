@@ -32,14 +32,14 @@ const transporter = nodemailer.createTransport({
 
 /**
  * This function contacts Google's servers and verifies the captcha response.
- * @param {*} reqObj the request body object
+ * @param {*} req the request object
  * @returns true or false depending on captcha validity/presence
  */
-async function validateCaptcha(reqObj) {
-  if (!reqObj["g-recaptcha-response"]) {
+async function validateCaptcha(req) {
+  if (!req.body["g-recaptcha-response"]) {
     return false;
   }
-  const responseKey = reqObj["g-recaptcha-response"];
+  const responseKey = req.body["g-recaptcha-response"];
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${responseKey}`;
   try {
@@ -53,9 +53,8 @@ async function validateCaptcha(reqObj) {
 /**
  * This function processes a request object and sends a new spill email.
  * @param {*} req the express request object
- * @param {*} reqObj the parsed JSON object from body of the request
  */
-async function emailSpill(req, reqObj) {
+async function emailSpill(req) {
   const date = new Date();
   const dateString = date.toLocaleString(TIME_LOCALE, { timeZone: TIMEZONE });
 
@@ -68,12 +67,12 @@ async function emailSpill(req, reqObj) {
 
         ---- Begin Message ----
 
-        ${reqObj["message"]}
+        ${req.body["message"]}
 
         ---- End Message ----
 
         **Keep confidential**
-        Sender email: ${reqObj["email"]}
+        Sender email: ${req.body["email"]}
         `,
   };
 
@@ -91,8 +90,11 @@ const app = express();
 // Set up CORS headers
 const corsOptions = {
   origin: CORS_WHITELIST
-}
-app.use(cors(corsOptions))
+};
+app.use(cors(corsOptions));
+
+// Populate body for application/json requests
+app.use(express.json());
 
 app.post("/spill", (req, res) => {
   if (!req.body) {
@@ -100,17 +102,8 @@ app.post("/spill", (req, res) => {
     return;
   }
 
-  let reqObj = {}
-  try {
-    reqObj = JSON.parse(req.body);
-  }
-  catch (error) {
-    res.status(400).send("Invalid JSON in request.")
-    return;
-  }
-
   // Verify captcha
-  if (!validateCaptcha(reqObj)) {
+  if (!validateCaptcha(req)) {
     res
       .status(400)
       .send(
@@ -120,7 +113,7 @@ app.post("/spill", (req, res) => {
   }
 
   // Verify email is @wisc.edu
-  if (!reqObj["email"]) {
+  if (!req.body["email"]) {
     res
       .status(400)
       .send(
@@ -129,7 +122,7 @@ app.post("/spill", (req, res) => {
     return;
   }
 
-  if (!reqObj["email"].toLowerCase().endsWith("@wisc.edu")) {
+  if (!req.body["email"].toLowerCase().endsWith("@wisc.edu")) {
     res
       .status(400)
       .send(
@@ -139,13 +132,13 @@ app.post("/spill", (req, res) => {
   }
 
   // Verify that a message is present
-  if (!reqObj["message"]) {
+  if (!req.body["message"]) {
     res.status(400).send("No message was included.");
     return;
   }
 
   // Send email
-  emailSpill(req, reqObj);
+  emailSpill(req);
   res.status(200).send();
 });
 
