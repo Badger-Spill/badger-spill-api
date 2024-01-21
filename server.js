@@ -32,14 +32,14 @@ const transporter = nodemailer.createTransport({
 
 /**
  * This function contacts Google's servers and verifies the captcha response.
- * @param {*} req the request object
+ * @param {*} reqObj the request body object
  * @returns true or false depending on captcha validity/presence
  */
-async function validateCaptcha(req) {
-  if (!req.body["g-recaptcha-response"]) {
+async function validateCaptcha(reqObj) {
+  if (!reqObj["g-recaptcha-response"]) {
     return false;
   }
-  const responseKey = req.body["g-recaptcha-response"];
+  const responseKey = reqObj["g-recaptcha-response"];
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${responseKey}`;
   try {
@@ -52,9 +52,10 @@ async function validateCaptcha(req) {
 
 /**
  * This function processes a request object and sends a new spill email.
- * @param {*} req 
+ * @param {*} req the express request object
+ * @param {*} reqObj the parsed JSON object from body of the request
  */
-async function emailSpill(req) {
+async function emailSpill(req, reqObj) {
   const date = new Date();
   const dateString = date.toLocaleString(TIME_LOCALE, { timeZone: TIMEZONE });
 
@@ -67,12 +68,12 @@ async function emailSpill(req) {
 
         ---- Begin Message ----
 
-        ${req.body["message"]}
+        ${reqObj["message"]}
 
         ---- End Message ----
 
         **Keep confidential**
-        Sender email: ${req.body["email"]}
+        Sender email: ${reqObj["email"]}
         `,
   };
 
@@ -99,8 +100,17 @@ app.post("/spill", (req, res) => {
     return;
   }
 
+  let reqObj = {}
+  try {
+    reqObj = JSON.parse(req.body);
+  }
+  catch (error) {
+    res.status(400).send("Invalid JSON in request.")
+    return;
+  }
+
   // Verify captcha
-  if (!validateCaptcha(req)) {
+  if (!validateCaptcha(reqObj)) {
     res
       .status(400)
       .send(
@@ -110,7 +120,7 @@ app.post("/spill", (req, res) => {
   }
 
   // Verify email is @wisc.edu
-  if (!req.body["email"]) {
+  if (!reqObj["email"]) {
     res
       .status(400)
       .send(
@@ -119,7 +129,7 @@ app.post("/spill", (req, res) => {
     return;
   }
 
-  if (!req.body["email"].toLowerCase().endsWith("@wisc.edu")) {
+  if (!reqObj["email"].toLowerCase().endsWith("@wisc.edu")) {
     res
       .status(400)
       .send(
@@ -129,13 +139,13 @@ app.post("/spill", (req, res) => {
   }
 
   // Verify that a message is present
-  if (!req.body["message"]) {
+  if (!reqObj["message"]) {
     res.status(400).send("No message was included.");
     return;
   }
 
   // Send email
-  emailSpill(req);
+  emailSpill(req, reqObj);
   res.status(200).send();
 });
 
