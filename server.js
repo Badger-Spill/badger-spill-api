@@ -23,11 +23,16 @@ const credentials = {
 };
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  requireTLS: true,
   auth: {
     user: GMAIL_USERNAME,
     pass: GMAIL_APP_PASS,
   },
+  logger: true,  // Log information
+  debug: true,  // Output everything
 });
 
 /**
