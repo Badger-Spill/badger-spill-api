@@ -8,14 +8,20 @@ const nodemailer = require("nodemailer");
 // Config
 const TIME_LOCALE = "en-US";
 const TIMEZONE = "America/Chicago";
-const CORS_WHITELIST = ['https://thebadgerspill.com', 'https://badger-spill.github.io', 'http://localhost:4321']; // This is the list of domains that forms can be submitted from
+const CORS_WHITELIST = [
+  "https://thebadgerspill.com",
+  "https://badger-spill.github.io",
+  "http://localhost:4321",
+]; // This is the list of domains that forms can be submitted from
 
 // Environment Variables
 const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
 const TLS_CERT = fs.readFileSync(process.env.TLS_CERT);
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
-const GMAIL_USERNAME = process.env.GMAIL_USERNAME;
-const GMAIL_APP_PASS = process.env.GMAIL_PASS;
+const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT;
 
 const credentials = {
   key: TLS_KEY,
@@ -23,16 +29,16 @@ const credentials = {
 };
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
+  host: SMTP_HOST,
+  port: SMTP_PORT,
   secure: true,
   requireTLS: true,
   auth: {
-    user: GMAIL_USERNAME,
-    pass: GMAIL_APP_PASS,
+    user: EMAIL_USERNAME,
+    pass: EMAIL_PASSWORD,
   },
-  logger: true,  // Log information
-  debug: true,  // Output everything
+  logger: true, // Log information
+  debug: true, // Output everything
 });
 
 /**
@@ -64,21 +70,21 @@ async function emailSpill(req) {
   const dateString = date.toLocaleString(TIME_LOCALE, { timeZone: TIMEZONE });
 
   const mailOptions = {
-    from: GMAIL_USERNAME,
+    from: EMAIL_USERNAME,
     to: "dev.badgerspill@gmail.com", // TODO
     subject: `Spill Received [${dateString}]`,
     text: `Date/time received: ${dateString}
-        IP Address: ${req.ip}
+IP Address: ${req.ip}
 
-        ---- Begin Message ----
+---- Begin Message ----
 
-        ${req.body["message"]}
+${req.body["message"]}
 
-        ---- End Message ----
+---- End Message ----
 
-        **Keep confidential**
-        Sender email: ${req.body["email"]}
-        `,
+**Keep confidential**
+Sender email: ${req.body["email"]}
+`,
   };
 
   // Send email
@@ -94,25 +100,25 @@ const app = express();
 
 // Set up CORS headers
 const corsOptions = {
-  origin: CORS_WHITELIST
+  origin: CORS_WHITELIST,
 };
 app.use(cors(corsOptions));
 
 // Populate body for application/json requests
 app.use(express.json());
 
-app.post("/spill", (req, res) => {
+app.post("/spill", async (req, res) => {
   if (!req.body) {
     res.status(400).send("No body attached to request.");
     return;
   }
 
   // Verify captcha
-  if (!validateCaptcha(req)) {
+  if (!(await validateCaptcha(req))) {
     res
       .status(400)
       .send(
-        "Please complete the captcha (the \"I'm not a robot checkbox\") and try again."
+        'Please complete the captcha (the "I\'m not a robot checkbox") and try again.'
       );
     return;
   }
@@ -143,7 +149,7 @@ app.post("/spill", (req, res) => {
   }
 
   // Send email
-  emailSpill(req);
+  await emailSpill(req);
   res.status(200).send();
 });
 
