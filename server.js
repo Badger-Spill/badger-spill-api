@@ -120,7 +120,7 @@ app.post("/spill", async (req, res) => {
     res
       .status(400)
       .send(
-        'Please complete the captcha (the "I\'m not a robot checkbox") and try again.'
+        'Please complete the captcha (the "I\'m not a robot" checkbox) and try again.'
       );
     return;
   }
