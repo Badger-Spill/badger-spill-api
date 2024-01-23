@@ -72,7 +72,7 @@ async function emailSpill(req) {
   const mailOptions = {
     from: EMAIL_USERNAME,
     to: "confidentialbounce@gmail.com",
-    subject: `Spill Received [${dateString}]`,
+    subject: `New Spill [${dateString}]`,
     text: `Date/time received: ${dateString}
 IP Address: ${req.ip}
 
