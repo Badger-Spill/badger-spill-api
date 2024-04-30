@@ -109,6 +109,11 @@ app.use(cors(corsOptions));
 // Populate body for application/json requests
 app.use(express.json());
 
+app.get("/status", async (req, res) => {
+  res.status(200).send();
+  return;
+});
+
 app.post("/spill", async (req, res) => {
   if (!req.body) {
     res.status(400).send("No body attached to request.");
