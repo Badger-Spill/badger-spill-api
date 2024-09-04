@@ -37,8 +37,8 @@ const transporter = nodemailer.createTransport({
     user: EMAIL_USERNAME,
     pass: EMAIL_PASSWORD,
   },
-  logger: true, // Log information
-  debug: true, // Output everything
+  logger: false, // Do not log information
+  debug: false, // Output nothing
 });
 
 /**
