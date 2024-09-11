@@ -82,3 +82,7 @@ In addition to these basic security measures, it is highly recommended that you 
 
 ### Email
 The trickiest part of getting this API server to run is finding an email provider. Surprisingly, maintaining our own email server was the easiest and cheapest solution for this. We use [docker-mailserver](https://github.com/docker-mailserver/docker-mailserver) to do this. Similar to deploying this API, you only need to clone the repository and execute a few commands to install this software. You will need to configure some DNS records (through your domain provider) and change some config variables, but other than that, the setup is pretty minimal. You will also need to whitelist your new email from landing in a spam inbox on your receiving email (since self-hosted email often ends up in spam inboxes). 
+
+## License
+
+This program is free software licensed under the GNU AGPL v3.
