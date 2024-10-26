@@ -21,8 +21,10 @@ const process = require("process");
 const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
-const https = require("https");
+const http = require("http");
 const nodemailer = require("nodemailer");
+
+require("dotenv").config();
 
 // Config
 const TIME_LOCALE = "en-US";
@@ -34,18 +36,12 @@ const CORS_WHITELIST = [
 ]; // This is the list of domains that forms can be submitted from
 
 // Environment Variables
-const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
-const TLS_CERT = fs.readFileSync(process.env.TLS_CERT);
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
-
-const credentials = {
-  key: TLS_KEY,
-  cert: TLS_CERT,
-};
+const PORT = process.env.PORT;
 
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
@@ -179,7 +175,7 @@ app.post("/spill", async (req, res) => {
   res.status(200).send("Your spill has been sent successfully!");
 });
 
-const server = https.createServer(credentials, app);
-server.listen(443, () => {
-  console.log("Badger Spill API started.");
+const server = http.createServer(app);
+server.listen(PORT, () => {
+  console.log(`Badger Spill API started on port ${PORT}.`);
 });
