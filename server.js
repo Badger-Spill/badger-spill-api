@@ -21,8 +21,11 @@ const process = require("process");
 const fs = require("fs");
 const express = require("express");
 const cors = require("cors");
-const https = require("https");
-const nodemailer = require("nodemailer");
+const http = require("http");
+const zod = require("zod");
+
+// Read from .env file
+require('dotenv').config();
 
 // Config
 const TIME_LOCALE = "en-US";
@@ -32,33 +35,16 @@ const CORS_WHITELIST = [
   "https://badger-spill.github.io",
   "http://localhost:4321",
 ]; // This is the list of domains that forms can be submitted from
+const EMAIL_ENDING = "wisc.edu";
+const MAX_MESSAGE_LENGTH = 10000;
 
 // Environment Variables
-const TLS_KEY = fs.readFileSync(process.env.TLS_KEY);
-const TLS_CERT = fs.readFileSync(process.env.TLS_CERT);
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
-const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
-const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = process.env.SMTP_PORT;
+const PORT = process.env.PORT;
+const WEBHOOK_URL = process.env.WEBHOOK_URL;
 
-const credentials = {
-  key: TLS_KEY,
-  cert: TLS_CERT,
-};
-
-const transporter = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: true,
-  requireTLS: true,
-  auth: {
-    user: EMAIL_USERNAME,
-    pass: EMAIL_PASSWORD,
-  },
-  logger: false, // Do not log information
-  debug: false, // Output nothing
-});
+const emailValidator = zod.string().email().endsWith(EMAIL_ENDING).max(50);
+const messageValidator = zod.string().max(MAX_MESSAGE_LENGTH);
 
 /**
  * This function contacts Google's servers and verifies the captcha response.
@@ -73,48 +59,73 @@ async function validateCaptcha(req) {
 
   const url = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET_KEY}&response=${responseKey}`;
   try {
-    const googleResponse = await (await fetch(url, { method: "post" })).json();
+    const googleResponse = await (await fetch(url, { method: "POST" })).json();
     return googleResponse.success == true;
   } catch (error) {
     return false;
   }
 }
 
-/**
- * This function processes a request object and sends a new spill email.
- * @param {*} req the express request object
- */
-async function emailSpill(req) {
-  const date = new Date();
-  const dateString = date.toLocaleString(TIME_LOCALE, { timeZone: TIMEZONE });
-
-  const mailOptions = {
-    from: EMAIL_USERNAME,
-    to: "confidentialbounce@gmail.com",
-    subject: `New Spill [${dateString}]`,
-    text: `Date/time received: ${dateString}
-IP Address: ${req.ip}
-
----- Begin Message ----
-
-${req.body["message"]}
-
----- End Message ----
-
-
-
-**Keep confidential**
-Sender email: ${req.body["email"]}
-`,
-  };
-
-  // Send email
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent: ", info.messageId);
-  } catch (error) {
-    console.error("Error sending email: ", error);
+function getSlackMessageObject(email, ip, message) {
+  return {
+    "blocks": [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*New spill received!*"
+        }
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "plain_text",
+          "text": message,
+          "emoji": true
+        }
+      },
+      {
+        "type": "divider"
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*Sender info, keep confidential!*"
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "plain_text",
+          "text": `Email: ${email}`,
+          "emoji": true
+        }
+      },
+      {
+        "type": "section",
+        "text": {
+          "type": "plain_text",
+          "text": `IP Address: ${ip}`,
+          "emoji": true
+        }
+      }
+    ]
   }
+}
+
+async function sendSlackMessage(messageObj) {
+  console.log(JSON.stringify(messageObj))
+  await fetch(WEBHOOK_URL, {
+    method: 'POST',
+    body: JSON.stringify(messageObj),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
 }
 
 const app = express();
@@ -150,36 +161,49 @@ app.post("/spill", async (req, res) => {
   }
 
   // Verify email is @wisc.edu
-  if (!req.body["email"]) {
+  let email;
+  try {
+    email = emailValidator.parse(req.body["email"].toLowerCase())
+  }
+  catch {
     res
       .status(400)
       .send(
-        "A wisc.edu email must be specified so that we can respond to your message."
+        "A wisc.edu email must be specified so that we can respond to your message. Only students with valid wisc.edu email may submit messages."
       );
     return;
   }
 
-  if (!req.body["email"].toLowerCase().endsWith("@wisc.edu")) {
+  let message;
+  try {
+    message = messageValidator.parse(req.body["message"])
+  }
+  catch {
     res
       .status(400)
       .send(
-        "Badger Spill can only respond to students with valid wisc.edu emails."
+        `A message must be included. Messages cannot be longer than ${MAX_MESSAGE_LENGTH} characters.`
       );
     return;
   }
 
-  // Verify that a message is present
-  if (!req.body["message"]) {
-    res.status(400).send("No message was included.");
+  // Send spill to Slack
+  try {
+    await sendSlackMessage(getSlackMessageObject(email, req.ip, message));
+    res.status(200).send("Your spill has been sent successfully!");
     return;
   }
-
-  // Send email
-  await emailSpill(req);
-  res.status(200).send("Your spill has been sent successfully!");
+  catch {
+    res
+      .status(500)
+      .send(
+        "There was an error. Please email dev.badgerspill@gmail.com to let us know something went wrong. We will fix our server issues, and then you can resubmit your message."
+      );
+    return;
+  }
 });
 
-const server = https.createServer(credentials, app);
-server.listen(443, () => {
-  console.log("Badger Spill API started.");
+const server = http.createServer(app);
+server.listen(PORT, () => {
+  console.log(`Badger Spill API started on port ${PORT}.`);
 });
