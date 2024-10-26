@@ -7,29 +7,27 @@ This repository contains code for the API server that handles spill submissions.
 The Badger Spill API requires these environment variables to be set before running the program:
 
 ```
-TLS_KEY # File path to your TLS key
-TLS_CERT # File path to your TLS cert
 RECAPTCHA_SECRET_KEY # Recaptcha secret key obtaineed from Google
 EMAIL_USERNAME # email that you want to log into
 EMAIL_PASSWORD # password for the email
 SMTP_HOST # Domain of the smtp server you want to log into
 SMTP_PORT # Port to log into smtp with
+PORT # The port to run the http server at
 ```
 
 You can set these environment variables permanently using a bashrc file (typically located at ~./.bashrc).
 
 ```bash
 # At bottom of ~/.bashrc 
-export TLS_KEY="/path/to/key"
-export TLS_CERT="/path/to/cert"
 export RECAPTCHA_SECRET_KEY=123456789
 export EMAIL_USERNAME="example@cooldomain.com"
 export EMAIL_PASSWORD="myemailpassword"
 export SMTP_HOST="smtp.mydomain.com"
 export SMTP_PORT=465
+export PORT=8080
 ```
 
-You can obtain TLS certificates using ```certbot``` from Let's Encrypt. A Recaptcha v2 Checkbox key can be obtained from Google. You will need to find an email provider that allows username/password access to SMTP or maintain your own email server.
+You should use a reverse proxy to secure this server with HTTPS. By default, this server only uses HTTP. [Caddy](https://caddyserver.com) is wicked easy to set up and is recommended for securing the server with HTTPS. A Recaptcha v2 Checkbox key can be obtained from Google. You will need to find an email provider that allows username/password access to SMTP or maintain your own email server.
 
 You will neeed to install Docker and Docker Compose (which is typically bundled with Docker) to use this program.
 

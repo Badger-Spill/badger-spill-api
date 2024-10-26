@@ -3,7 +3,7 @@ services:
     image: badger-spill-api:latest
     container_name: badger-spill-api
     ports:
-      - "8080:8080"
+      - "${PORT}:${PORT}"
     restart: always
     environment:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
@@ -11,4 +11,4 @@ services:
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
-      - PORT=8080
+      - PORT=${PORT}
