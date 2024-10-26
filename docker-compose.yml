@@ -3,16 +3,12 @@ services:
     image: badger-spill-api:latest
     container_name: badger-spill-api
     ports:
-      - "443:443"
+      - "8080:8080"
     restart: always
     environment:
-      - TLS_KEY=${TLS_KEY}
-      - TLS_CERT=${TLS_CERT}
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
       - EMAIL_USERNAME=${EMAIL_USERNAME}
       - EMAIL_PASSWORD=${EMAIL_PASSWORD}
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
-    volumes:
-      - ${TLS_KEY}:${TLS_KEY}
-      - ${TLS_CERT}:${TLS_CERT}
+      - PORT=${PORT}
