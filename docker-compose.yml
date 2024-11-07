@@ -12,3 +12,4 @@ services:
       - SMTP_HOST=${SMTP_HOST}
       - SMTP_PORT=${SMTP_PORT}
       - PORT=${PORT}
+      - BEHIND_REVERSE_PROXY=${BEHIND_REVERSE_PROXY}

@@ -127,6 +127,9 @@ app.use(cors(corsOptions));
 // Populate body for application/json requests
 app.use(express.json());
 
+// Make sure that IP forwarding works correctly if using a reverse proxy
+app.set("trust proxy", BEHIND_REVERSE_PROXY);
+
 app.get("/status", async (req, res) => {
   res.status(200).send();
   return;
@@ -177,9 +180,6 @@ app.post("/spill", async (req, res) => {
   await emailSpill(req);
   res.status(200).send("Your spill has been sent successfully!");
 });
-
-// Make sure that IP forwarding works correctly if using a reverse proxy
-app.set("trust proxy", BEHIND_REVERSE_PROXY);
 
 // Start server
 const server = http.createServer(app);
