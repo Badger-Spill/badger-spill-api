@@ -42,6 +42,9 @@ const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const PORT = process.env.PORT;
+const BEHIND_REVERSE_PROXY =
+  process.env.BEHIND_REVERSE_PROXY != undefined &&
+  process.env.BEHIND_REVERSE_PROXY.toLowerCase() == "true";
 
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
@@ -175,6 +178,10 @@ app.post("/spill", async (req, res) => {
   res.status(200).send("Your spill has been sent successfully!");
 });
 
+// Make sure that IP forwarding works correctly if using a reverse proxy
+app.set("trust proxy", BEHIND_REVERSE_PROXY);
+
+// Start server
 const server = http.createServer(app);
 server.listen(PORT, () => {
   console.log(`Badger Spill API started on port ${PORT}.`);
