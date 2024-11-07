@@ -25,11 +25,14 @@ export EMAIL_PASSWORD="myemailpassword"
 export SMTP_HOST="smtp.mydomain.com"
 export SMTP_PORT=465
 export PORT=8080
+export BEHIND_REVERSE_PROXY=true # set true if using reverse proxy, allows ip forwarding from proxy
 ```
 
 You should use a reverse proxy to secure this server with HTTPS. By default, this server only uses HTTP. [Caddy](https://caddyserver.com) is wicked easy to set up and is recommended for securing the server with HTTPS. A Recaptcha v2 Checkbox key can be obtained from Google. You will need to find an email provider that allows username/password access to SMTP or maintain your own email server.
 
-You will neeed to install Docker and Docker Compose (which is typically bundled with Docker) to use this program.
+If setting ``BEHIND_REVERSE_PROXY=true``, make sure that the proxy overrides proxy headers. Caddy does this automatically.
+
+You will need to install Docker and Docker Compose (which is typically bundled with Docker) to use this program.
 
 ## Installing
 
