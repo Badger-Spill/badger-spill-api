@@ -7,9 +7,6 @@ services:
     restart: always
     environment:
       - RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
-      - EMAIL_USERNAME=${EMAIL_USERNAME}
-      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
+      - WEBHOOK_URL=${WEBHOOK_URL}
       - PORT=${PORT}
       - BEHIND_REVERSE_PROXY=${BEHIND_REVERSE_PROXY}
