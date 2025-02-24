@@ -97,4 +97,4 @@ Prior to open source, Badger Spill was sharing .zip files between contributors. 
 
 3. This isn't a commercial product--it's a community good
 
-Lastly, and most significantly, this isn't a piece of software that will ever be sold. It's a passion project by the student community and for the student community. There's no reason that we need to keep this code private. We stand only to gain by making our work public. Open source aligns with these values.
+Lastly, and most significantly, this isn't a piece of software that will ever be sold. It's a passion project by the student community and for the student community. There's no reason that we need to keep this code private. We stand only to gain by making our work public. We also felt that improvements made to this project should be shared back with the community to ensure that everyone benefits. Open source and AGPL3 align with these values.
