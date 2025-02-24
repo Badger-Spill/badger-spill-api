@@ -34,6 +34,7 @@ const CORS_WHITELIST = [
 ]; // This is the list of domains that forms can be submitted from
 const EMAIL_ENDING = "wisc.edu";
 const MAX_MESSAGE_LENGTH = 10000;
+const DEV_EMAIL = "dev.badgerspill@gmail.com"
 
 // Environment Variables
 const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
@@ -142,11 +143,18 @@ app.use(express.json());
 // Make sure that IP forwarding works correctly if using a reverse proxy
 app.set("trust proxy", BEHIND_REVERSE_PROXY);
 
+/*
+  This endpoint can be used to set up a status tracker for notifications
+  about downtime or crashes.
+*/
 app.get("/status", async (req, res) => {
   res.status(200).send();
   return;
 });
 
+/*
+  This is the endpoint that handles new spills.
+*/
 app.post("/spill", async (req, res) => {
   if (!req.body) {
     res.status(400).send("No body attached to request.");
@@ -200,7 +208,7 @@ app.post("/spill", async (req, res) => {
     res
       .status(500)
       .send(
-        "There was an error. Please email dev.badgerspill@gmail.com to let us know something went wrong. We will fix our server issues, and then you can resubmit your message."
+        `There was an error. Please email ${DEV_EMAIL} to let us know something went wrong. We will fix our server issues, and then you can resubmit your message.`
       );
     return;
   }
