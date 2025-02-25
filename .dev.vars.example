@@ -1,0 +1,9 @@
+# Example file showing .dev.vars for local development
+# For production, you will need to use wrangler secrets push
+# to push secrets to the production instance of the worker.
+
+# Remember: NEVER push your environment variables/secrets to a source code repository.
+# This includes your .dev.vars file.
+
+WEBHOOK_URL=https://hooks.slack.com/services/YOUR_WEBHOOK_URL_GENERATED_BY_SLACK
+RECAPTCHA_SECRET_KEY=YOUR_RECAPTCHA_KEY_GENERATED_BY_GOOGLE

@@ -1,8 +1,7 @@
 {
   "name": "badger-spill-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "API Server for handling Badger Spill submissions",
-  "main": "server.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Badger-Spill/badger-spill-api.git"
@@ -13,10 +12,17 @@
     "url": "https://github.com/Badger-Spill/badger-spill-api/issues"
   },
   "homepage": "https://github.com/Badger-Spill/badger-spill-api#readme",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy --minify"
+  },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.18.2",
-    "zod": "^3.23.8"
-  }
+    "hono": "^4.7.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250214.0",
+    "wrangler": "^3.109.2"
+  },
+  "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
 }

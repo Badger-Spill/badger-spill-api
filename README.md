@@ -1,12 +1,11 @@
 # Badger Spill API
 
-This repository contains code for the API server that handles spill submissions. It is deployed using containers and Docker Compose.
+This repository contains code for the API server that handles spill submissions. This API was built using [Hono](https://hono.dev). It is designed to be deployed on Cloudflare Workers, but it could easily be adapted for deployment on any platform that Hono supports. Cloudflare's free tier for Workers is MORE than enough to support Badger Spill's needs, which is why we chose it.
 
 ## Prerequisites
 
-1. A server with Docker installed
-2. A Google reCaptcha key (free)
-3. A Slack webhook URL (also free)
+1. A Google reCaptcha key (free)
+2. A Slack webhook URL (also free)
 
 ## Configuration
 
@@ -15,71 +14,41 @@ The Badger Spill API requires these environment variables to be set before runni
 ```
 RECAPTCHA_SECRET_KEY # The secret key given to you by Google's reCaptcha service
 WEBHOOK_URL # The Slack webhook URL used to deliver spill notifications
-PORT # The port that the server listens on
-BEHIND_REVERSE_PROXY # whether or not the server is behind a reverse proxy (acceptable values: false, true)
 ```
 
-You can set these environment variables permanently using a bashrc file (typically located at ~./.bashrc).
+For local development, you can set these variables using a ``.dev.vars`` file. See ``.dev.vars.example`` for an example.
+
+There are also various constants "baked-in" to the source code at the top of the ``src/index.ts`` file. These constants are specific to Badger Spill, and you will need to change them if you fork the code for another organization.
+
+Badger Spill uses a custom URL for its worker. This is configured in wrangler.jsonc and your Cloudflare Dashboard.
+
+## Local Development
+
+To set up a local development environment, you will need ``pnpm`` installed.
+
+To get started, run ``pnpm install``. Then, when you're ready to spin up a development server, run ``pnpm run dev``. This will allow you to test changes locally. The Badger Spill website will automatically query this development instance when it is also being run in a local development server.
+
+Remember to change your .dev.vars file before testing. **NEVER** commit your environment variables or secrets (which includes your .dev.vars file) to a source code repository.
+
+## Deploying to Cloudflare Workers
+
+Firstly, you will need to add secrets (your WEBHOOK_URL and RECAPTCHA_SECRET_KEY variables) to your Cloudflare Worker. To do this, run:
 
 ```bash
-# At bottom of ~/.bashrc 
-export RECAPTCHA_SECRET_KEY=123456789
-export WEBHOOK_URL="https://hooks.slack.com/services/replace-with-your-webhook-url"
-export PORT=8080
-export BEHIND_REVERSE_PROXY=true # set true if using reverse proxy, allows ip forwarding from proxy
+npx wrangler secret put WEBHOOK_URL
+
+# enter your webhook URL when prompted
+
+npx wrangler secret put RECAPTCHA_SECRET_KEY
+
+# enter your reCaptcha secret key when prompted
 ```
 
-There are also various constants "baked-in" to the source code at the top of the ``server.js`` file.
+Once you add the secrets to your Cloudflare Worker, they will only be accessible from your worker code. They will not be visible from the ``wrangler`` tool or the Cloudflare Dashboard.
 
-## Installing
+As a reminder, you should **NEVER** commit your environment variables or secrets to a source code repository.
 
-After completing the prerequisites and configuring environment variables, installation is simple. All you have to do is clone the repository, open a firewall port, and build the container!
-
-```bash
-git clone https://github.com/Badger-Spill/badger-spill-api
-sudo ufw allow 443 # Allow HTTPS connections through firewall
-sudo docker build . -t badger-spill-api
-```
-
-## Securing with HTTPS
-
-By default, this code only provides an HTTP server. This is acceptable for local development. For a production deployment, though, it is imperative to use HTTPS. The easiest way to do this is with a reverse proxy. We use [Caddy](https://caddyserver.com) at Badger Spill. It is extremely easy to set up, and it manages certificate provisioning/renewal for you. If you use a reverse proxy to secure your app, make sure to set the ``BEHIND_REVERSE_PROXY`` header to ``true``.
-
-## Using
-
-The Badger Spill API uses Docker Compose as a daemon. This makes deployments simple and reproducible. By default, the Badger Spill API server will auto-restart in the event of a crash. This can be changed in ```docker-compose.yml``` if desired.
-
-Starting API server:
-```bash
-cd /path/to/cloned/repository
-sudo -E docker compose up -d # Must use sudo -E to pass environment variables
-```
-
-Stopping the API server:
-```bash
-cd /path/to/cloned/repository
-sudo -E docker compose down
-```
-
-## Updating
-
-Updating is also very simple! Push your changes to this repository, pull them in via git on the server, and rebuild the container!
-
-```bash
-cd /path/to/cloned/repository
-sudo -E docker compose down
-git pull
-sudo docker build . -t badger-spill-api
-sudo -E docker compose up -d
-```
-
-## Note to future mantainers
-
-### A word on security
-It is recommended you take some precautions to prevent unauthorized access to the API server. Firstly, you should install and configure fail2ban to prevent brute-force attacks on ssh. Secondly, you should configure SSH to use ssh keys instead of passswords (and disable password login once you have done so). Lastly, you should disable root login via ssh.
-
-### Keeping the system up-to-date
-In addition to these basic security measures, it is highly recommended that you regularly update the system.
+To deploy your code, run ``pnpm run deploy``. This will build and deploy your code to a Cloudflare Worker. You can also enable automatic deployment via Git push by linking your repository in the Cloudflare dashboard.
 
 ## License
 

@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "badger-spill-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-02-25",
+  "routes": [
+    {
+      "pattern": "worker.thebadgerspill.com",
+      "custom_domain": true
+    }
+  ]
+}
